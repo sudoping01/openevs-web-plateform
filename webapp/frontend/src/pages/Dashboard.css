@@ -1,0 +1,297 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Page header ─────────────────────────────────────────────────────────── */
+.dash-header {
+  background: rgba(13, 13, 13, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Amber top accent */
+.dash-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--amber) 0%, rgba(245,166,35,0.4) 40%, transparent 70%);
+}
+
+.dash-header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.dash-header-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  line-height: 1;
+}
+
+.dash-header-device {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--amber);
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+}
+
+.dash-header-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Connection pill ─────────────────────────────────────────────────────── */
+.conn-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  border: 1px solid;
+  padding: 4px 10px;
+  text-transform: uppercase;
+  border-radius: 2px;
+  transition: all var(--transition);
+}
+
+.conn-pill-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Main ────────────────────────────────────────────────────────────────── */
+.dash-main {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ── Section ─────────────────────────────────────────────────────────────── */
+.dash-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px 24px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+/* Left accent bar */
+.dash-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 2px; height: 100%;
+  background: var(--border-lit);
+  transition: background 0.3s ease;
+}
+
+.dash-section:has(.metric-card--active)::before,
+.dash-section--charging::before {
+  background: linear-gradient(180deg, var(--amber) 0%, rgba(245,166,35,0.4) 100%);
+  box-shadow: 2px 0 12px var(--amber-glow);
+}
+
+.dash-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.dash-section-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+}
+
+/* ── Status row: ring on left, metrics on right ──────────────────────────── */
+.status-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 28px;
+  align-items: center;
+}
+
+.status-row-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ── Status badge ────────────────────────────────────────────────────────── */
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid;
+  padding: 6px 14px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: led-pulse 2s infinite;
+}
+
+@keyframes led-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+/* ── Charging ring ───────────────────────────────────────────────────────── */
+.charging-ring-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Outer dashed ring rotates when charging */
+.ring-outer-rotating {
+  transform-origin: 70px 70px;
+  animation: ring-rotate 18s linear infinite;
+}
+
+@keyframes ring-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.ring-glow {
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 166, 35, 0.18) 0%, transparent 70%);
+  animation: ring-breathe 2.5s ease infinite;
+  pointer-events: none;
+}
+
+@keyframes ring-breathe {
+  0%, 100% { opacity: 0.5; transform: scale(0.95); }
+  50%       { opacity: 1;   transform: scale(1.05); }
+}
+
+/* ── Metrics grid ────────────────────────────────────────────────────────── */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  flex: 1;
+}
+
+.metrics-grid.auto {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.metrics-grid.four {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.metric-card {
+  background: var(--surface2);
+  padding: 18px 20px;
+  transition: background var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card--active {
+  background: #0e0b04;
+}
+
+/* Amber top glow line on active */
+.metric-card--active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--amber), transparent);
+}
+
+.metric-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.metric-value {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.metric-unit {
+  font-size: 13px;
+  font-weight: 400;
+  margin-left: 3px;
+  opacity: 0.5;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) { .dash-header-pills { display: none; } }
+
+@media (max-width: 680px) {
+  .status-row {
+    grid-template-columns: 1fr;
+  }
+  .status-row-left {
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .dash-main    { padding: 12px; gap: 12px; }
+  .dash-header  { padding: 0 16px; }
+  .dash-section { padding: 14px 16px; }
+  .metrics-grid.four { grid-template-columns: repeat(2, 1fr); }
+}

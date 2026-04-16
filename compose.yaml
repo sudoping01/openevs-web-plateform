@@ -1,0 +1,71 @@
+services:
+
+  # ── MongoDB ────────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7
+    environment:
+      MONGO_INITDB_DATABASE: openevse
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - openevse-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── MQTT Broker (Mosquitto) ────────────────────────────────────────────────
+  mqtt-broker:
+    build:
+      context: ./mqtt_broker
+    ports:
+      - "1883:1883"
+    environment:
+      - MQTT_USER=sed
+      - MQTT_PASS=sed
+    volumes:
+      - mosquitto-data:/mosquitto/data
+    networks:
+      - openevse-network
+
+  # ── Backend (FastAPI + MQTT bridge + Auth) ─────────────────────────────────
+  backend:
+    build:
+      context: ./webapp/backend
+    ports:
+      - "8001:8000"
+    environment:
+      - MQTT_HOST=mqtt-broker
+      - MQTT_PORT=1883
+      - MQTT_USER=sed
+      - MQTT_PASS=sed
+      - MQTT_BASE_TOPIC=${MQTT_BASE_TOPIC:-DAUSTCharger/openevse}
+      - MONGO_URL=mongodb://mongodb:27017
+      - MONGO_DB=openevse
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production-use-a-long-random-secret}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - openevse-network
+
+  # ── Frontend (React + Nginx) ───────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./webapp/frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - openevse-network
+
+volumes:
+  mosquitto-data:
+  mongodb-data:
+
+networks:
+  openevse-network:
+    driver: bridge

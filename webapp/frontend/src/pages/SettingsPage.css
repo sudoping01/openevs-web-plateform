@@ -228,10 +228,209 @@
   opacity: 1;
 }
 
+/* ── Avatar upload ───────────────────────────────────────────────────────── */
+.avatar-upload {
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.avatar-upload:hover .avatar-overlay { opacity: 1; }
+
+.settings-avatar--img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--amber-dim);
+  box-shadow:
+    0 0 0 4px rgba(245,166,35,0.08),
+    0 0 20px var(--amber-glow);
+  display: block;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition);
+  color: #fff;
+}
+
+/* ── Editable fields ─────────────────────────────────────────────────────── */
+.settings-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+}
+
+.settings-field:last-child { border-bottom: none; }
+
+.settings-field-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  min-width: 120px;
+}
+
+.settings-field-static {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text);
+  text-align: right;
+}
+
+.settings-field-input {
+  background: var(--surface2);
+  border: 1px solid var(--border-lit);
+  color: var(--text);
+  padding: 7px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  border-radius: var(--radius);
+  outline: none;
+  text-align: right;
+  width: 260px;
+  transition: border-color var(--transition);
+}
+
+.settings-field-input:focus { border-color: var(--amber); }
+.settings-field-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Car picture ─────────────────────────────────────────────────────────── */
+.settings-car-pic-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.car-upload {
+  position: relative;
+  cursor: pointer;
+  border: 1px dashed var(--border-lit);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  height: 160px;
+  transition: border-color var(--transition);
+}
+
+.car-upload:hover { border-color: var(--amber); }
+.car-upload:hover .car-upload-overlay { opacity: 1; }
+
+.car-upload-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.car-upload-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  background: var(--surface2);
+}
+
+.car-upload-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+/* ── Save row ────────────────────────────────────────────────────────────── */
+.settings-save-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-save {
+  background: var(--amber);
+  border: none;
+  color: #fff;
+  padding: 11px 28px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: 0 2px 8px var(--amber-glow);
+}
+
+.btn-save:hover:not(:disabled) {
+  background: var(--amber-dim);
+  box-shadow: 0 4px 16px var(--amber-glow);
+  transform: translateY(-1px);
+}
+
+.btn-save:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.settings-unsaved {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--amber);
+  letter-spacing: 0.08em;
+  animation: pulse-opacity 2s ease infinite;
+}
+
+@keyframes pulse-opacity {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .settings-header { padding: 0 16px; }
   .settings-main   { padding: 12px; }
   .settings-danger-row { flex-direction: column; align-items: flex-start; }
   .settings-profile { flex-wrap: wrap; }
+  .settings-field { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .settings-field-input { width: 100%; text-align: left; }
+  .settings-field-static { text-align: left; }
 }

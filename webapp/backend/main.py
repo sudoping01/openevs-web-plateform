@@ -28,6 +28,7 @@ MQTT_BASE_TOPIC = os.getenv("MQTT_BASE_TOPIC", "DAUSTCharger/openevse")
 
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
 MONGO_DB = os.getenv("MONGO_DB", "openevse")
+RATE_CFA_PER_KWH = int(os.getenv("RATE_CFA_PER_KWH", "100"))
 
 SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production-use-a-long-random-secret")
 ALGORITHM = "HS256"
@@ -63,10 +64,22 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
 
 # ── Pydantic models ───────────────────────────────────────────────────────────
+class TopupRequest(BaseModel):
+    amount_cfa: int
+
+
+class ProfileUpdate(BaseModel):
+    email: Optional[str] = None
+    car_name: Optional[str] = None
+    profile_pic: Optional[str] = None   # base64 data URL
+    car_pic: Optional[str] = None       # base64 data URL
+
+
 class UserRegister(BaseModel):
     username: str
     email: str
     password: str
+    car_name: Optional[str] = None
 
 
 class UserLogin(BaseModel):
@@ -79,12 +92,14 @@ class Token(BaseModel):
     token_type: str
     username: str
     email: str
+    car_name: Optional[str] = None
 
 
 # ── Shared state ──────────────────────────────────────────────────────────────
 evse_state: dict = {}
 power_history: deque = deque(maxlen=120)
 connected_clients: set[WebSocket] = set()
+active_sessions: dict = {}  # username -> {start_energy_wh, start_time}
 
 _mqtt_client: mqtt.Client | None = None
 _event_loop: asyncio.AbstractEventLoop | None = None
@@ -101,17 +116,30 @@ async def get_user_by_email(email: str):
     return await _db.users.find_one({"email": email})
 
 
-async def create_user(username: str, email: str, password: str) -> dict:
+async def create_user(username: str, email: str, password: str, car_name: str = None) -> dict:
     doc = {
         "username": username,
         "email": email,
         "hashed_password": hash_password(password),
         "created_at": datetime.utcnow(),
         "role": "user",
+        "car_name": car_name or "",
+        "balance_cfa": 0,
     }
     result = await _db.users.insert_one(doc)
     doc["_id"] = str(result.inserted_id)
     return doc
+
+
+async def log_billing_transaction(username: str, tx_type: str, amount_cfa: int, kwh: float = 0.0, session_energy_wh: float = 0.0):
+    await _db.transactions.insert_one({
+        "username": username,
+        "type": tx_type,           # "charge" | "topup"
+        "amount_cfa": amount_cfa,  # negative for charges, positive for topups
+        "kwh": round(kwh, 4),
+        "session_energy_wh": session_energy_wh,
+        "timestamp": datetime.utcnow(),
+    })
 
 
 async def log_event(command: str, username: str, meta: dict = None):
@@ -222,6 +250,8 @@ async def lifespan(app: FastAPI):
     await _db.users.create_index("email", unique=True)
     # Auto-expire events after 90 days; also serves as an index for sorted queries
     await _db.events.create_index("timestamp", expireAfterSeconds=7776000, name="events_ttl")
+    await _db.transactions.create_index([("username", 1), ("timestamp", -1)])
+    await _db.transactions.create_index("timestamp", expireAfterSeconds=31536000, name="transactions_ttl")  # 1yr
     print(f"[MongoDB] Connected to {MONGO_URL}/{MONGO_DB}")
 
     # MQTT
@@ -284,9 +314,9 @@ async def register(request: Request, data: UserRegister):
     if await get_user_by_email(data.email):
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    user = await create_user(data.username, data.email, data.password)
+    user = await create_user(data.username, data.email, data.password, data.car_name)
     token = create_access_token({"sub": user["username"]})
-    return Token(access_token=token, token_type="bearer", username=user["username"], email=user["email"])
+    return Token(access_token=token, token_type="bearer", username=user["username"], email=user["email"], car_name=user["car_name"])
 
 
 @app.post("/api/auth/login", response_model=Token)
@@ -309,6 +339,44 @@ async def me(user: dict = Depends(require_auth)):
         "username": user["username"],
         "email": user["email"],
         "role": user.get("role", "user"),
+        "car_name": user.get("car_name", ""),
+        "profile_pic": user.get("profile_pic"),
+        "car_pic": user.get("car_pic"),
+        "created_at": created_at.isoformat() if created_at else None,
+    }
+
+
+@app.patch("/api/auth/me")
+async def update_profile(data: ProfileUpdate, user: dict = Depends(require_auth)):
+    updates = {}
+    if data.email is not None:
+        if "@" not in data.email:
+            raise HTTPException(status_code=400, detail="Invalid email address")
+        existing = await get_user_by_email(data.email)
+        if existing and existing["username"] != user["username"]:
+            raise HTTPException(status_code=400, detail="Email already in use")
+        updates["email"] = data.email
+    if data.car_name is not None:
+        updates["car_name"] = data.car_name
+    if data.profile_pic is not None:
+        if len(data.profile_pic) > 600_000:
+            raise HTTPException(status_code=400, detail="Profile picture too large (max ~450 KB)")
+        updates["profile_pic"] = data.profile_pic
+    if data.car_pic is not None:
+        if len(data.car_pic) > 600_000:
+            raise HTTPException(status_code=400, detail="Car picture too large (max ~450 KB)")
+        updates["car_pic"] = data.car_pic
+    if updates:
+        await _db.users.update_one({"username": user["username"]}, {"$set": updates})
+    updated = await get_user_by_username(user["username"])
+    created_at = updated.get("created_at")
+    return {
+        "username": updated["username"],
+        "email": updated["email"],
+        "role": updated.get("role", "user"),
+        "car_name": updated.get("car_name", ""),
+        "profile_pic": updated.get("profile_pic"),
+        "car_pic": updated.get("car_pic"),
         "created_at": created_at.isoformat() if created_at else None,
     }
 
@@ -325,7 +393,7 @@ async def get_events(
     limit: int = Query(default=50, ge=1, le=500),
     user: dict = Depends(require_auth),
 ):
-    cursor = _db.events.find({}, {"_id": 0}).sort("timestamp", -1).limit(limit)
+    cursor = _db.events.find({"username": user["username"]}, {"_id": 0}).sort("timestamp", -1).limit(limit)
     events = await cursor.to_list(length=limit)
     for e in events:
         if isinstance(e.get("timestamp"), datetime):
@@ -380,6 +448,46 @@ async def restart(target: str, user: dict = Depends(require_auth)):
     _mqtt_client.publish(f"{MQTT_BASE_TOPIC}/restart", json.dumps({"device": target}))
     await log_event("restart", user["username"], {"target": target})
     return {"ok": True, "command": f"restart_{target}"}
+
+
+# ── Balance endpoints (protected) ────────────────────────────────────────────
+@app.get("/api/balance")
+async def get_balance(
+    limit: int = Query(default=50, ge=1, le=200),
+    user: dict = Depends(require_auth),
+):
+    cursor = _db.transactions.find(
+        {"username": user["username"]}, {"_id": 0}
+    ).sort("timestamp", -1).limit(limit)
+    transactions = await cursor.to_list(length=limit)
+    for tx in transactions:
+        if isinstance(tx.get("timestamp"), datetime):
+            tx["timestamp"] = tx["timestamp"].isoformat()
+    return {
+        "balance_cfa": user.get("balance_cfa", 0),
+        "rate_cfa_per_kwh": RATE_CFA_PER_KWH,
+        "transactions": transactions,
+    }
+
+
+@app.post("/api/balance/topup")
+async def topup_balance(data: TopupRequest, user: dict = Depends(require_auth)):
+    if data.amount_cfa <= 0:
+        raise HTTPException(status_code=400, detail="Amount must be positive")
+    if data.amount_cfa > 500_000:
+        raise HTTPException(status_code=400, detail="Amount exceeds maximum top-up limit (500 000 CFA)")
+
+    new_balance = user.get("balance_cfa", 0) + data.amount_cfa
+    await _db.users.update_one(
+        {"username": user["username"]},
+        {"$set": {"balance_cfa": new_balance}},
+    )
+    await log_billing_transaction(
+        username=user["username"],
+        tx_type="topup",
+        amount_cfa=data.amount_cfa,
+    )
+    return {"ok": True, "balance_cfa": new_balance}
 
 
 # ── WebSocket endpoint (auth via ?token= query param) ─────────────────────────

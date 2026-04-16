@@ -173,7 +173,7 @@ function Section({ title, children, charging }) {
 
 // ── Dashboard page ────────────────────────────────────────────────────────────
 export default function Dashboard({ evse, powerHistory, wsStatus }) {
-  const { authFetch } = useAuth();
+  const { authFetch, user } = useAuth();
   const { toasts, addToast } = useToast();
 
   const loading = wsStatus === "connecting" && Object.keys(evse).length === 0;
@@ -225,6 +225,9 @@ export default function Dashboard({ evse, powerHistory, wsStatus }) {
           </span>
         </div>
         <div className="dash-header-pills">
+          {user?.car_name && (
+            <ConnPill label={user.car_name} active={true} color="var(--purple)" />
+          )}
           <ConnPill label="LIVE"    active={wsStatus === "connected"} color="var(--green)" />
           <ConnPill label="CHARGER" active={evseConn}                 color="var(--cyan)"  />
         </div>

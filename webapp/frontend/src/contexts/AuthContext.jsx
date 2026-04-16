@@ -50,17 +50,17 @@ export function AuthProvider({ children }) {
     [token, logout]
   );
 
-  const register = async (username, email, password) => {
+  const register = async (username, email, password, car_name = "") => {
     setLoading(true);
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ username, email, password, car_name }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail ?? "Registration failed");
-      saveSession(data.access_token, { username: data.username, email: data.email });
+      saveSession(data.access_token, { username: data.username, email: data.email, car_name: data.car_name });
       return { ok: true };
     } catch (err) {
       return { ok: false, error: err.message };
@@ -88,8 +88,16 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateUser = useCallback((fields) => {
+    setUser((prev) => {
+      const next = { ...prev, ...fields };
+      localStorage.setItem(USER_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, authFetch }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, authFetch, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

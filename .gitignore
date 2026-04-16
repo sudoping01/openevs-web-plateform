@@ -1,0 +1,44 @@
+# Python virtual environment
+env/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+.env.*
+*.env
+
+# Logs
+*.log
+backend_log
+
+# Node / frontend
+webapp/frontend/node_modules/
+webapp/frontend/.next/
+webapp/frontend/dist/
+webapp/frontend/build/
+webapp/frontend/.env.local
+webapp/frontend/.env.*.local
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data / state
+messages.json
+
+# Claude
+.claude/

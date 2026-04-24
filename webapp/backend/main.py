@@ -93,6 +93,9 @@ class Token(BaseModel):
     username: str
     email: str
     car_name: Optional[str] = None
+    profile_pic: Optional[str] = None
+    car_pic: Optional[str] = None
+    balance_cfa: int = 0
 
 
 # ── Shared state ──────────────────────────────────────────────────────────────
@@ -316,7 +319,14 @@ async def register(request: Request, data: UserRegister):
 
     user = await create_user(data.username, data.email, data.password, data.car_name)
     token = create_access_token({"sub": user["username"]})
-    return Token(access_token=token, token_type="bearer", username=user["username"], email=user["email"], car_name=user["car_name"])
+    return Token(
+        access_token=token, token_type="bearer",
+        username=user["username"], email=user["email"],
+        car_name=user.get("car_name", ""),
+        profile_pic=user.get("profile_pic"),
+        car_pic=user.get("car_pic"),
+        balance_cfa=user.get("balance_cfa", 0),
+    )
 
 
 @app.post("/api/auth/login", response_model=Token)
@@ -329,7 +339,14 @@ async def login(request: Request, data: UserLogin):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     token = create_access_token({"sub": user["username"]})
-    return Token(access_token=token, token_type="bearer", username=user["username"], email=user["email"])
+    return Token(
+        access_token=token, token_type="bearer",
+        username=user["username"], email=user["email"],
+        car_name=user.get("car_name", ""),
+        profile_pic=user.get("profile_pic"),
+        car_pic=user.get("car_pic"),
+        balance_cfa=user.get("balance_cfa", 0),
+    )
 
 
 @app.get("/api/auth/me")
@@ -384,7 +401,12 @@ async def update_profile(data: ProfileUpdate, user: dict = Depends(require_auth)
 # ── EVSE status (protected) ───────────────────────────────────────────────────
 @app.get("/api/status")
 async def get_status(user: dict = Depends(require_auth)):
-    return {"state": evse_state, "power_history": list(power_history)}
+    return {
+        "state": evse_state,
+        "power_history": list(power_history),
+        "rate_cfa_per_kwh": RATE_CFA_PER_KWH,
+        "balance_cfa": user.get("balance_cfa", 0),
+    }
 
 
 # ── Events endpoint (protected) ───────────────────────────────────────────────
@@ -405,6 +427,7 @@ async def get_events(
 @app.post("/api/command/start")
 async def start_charging(user: dict = Depends(require_auth)):
     _mqtt_client.publish(f"{MQTT_BASE_TOPIC}/override/set", json.dumps({"state": "active"}))
+    active_sessions[user["username"]] = {"start_time": datetime.utcnow()}
     await log_event("start", user["username"])
     return {"ok": True, "command": "start"}
 
@@ -412,8 +435,28 @@ async def start_charging(user: dict = Depends(require_auth)):
 @app.post("/api/command/stop")
 async def stop_charging(user: dict = Depends(require_auth)):
     _mqtt_client.publish(f"{MQTT_BASE_TOPIC}/override/set", json.dumps({"state": "disabled"}))
+    # Auto-billing: deduct energy cost from balance
+    session = active_sessions.pop(user["username"], None)
+    new_balance = user.get("balance_cfa", 0)
+    if session:
+        session_wh = float(evse_state.get("session_energy", 0) or 0)
+        kwh = session_wh / 1000
+        cost = round(kwh * RATE_CFA_PER_KWH)
+        if cost > 0:
+            new_balance = max(0, user.get("balance_cfa", 0) - cost)
+            await _db.users.update_one(
+                {"username": user["username"]},
+                {"$set": {"balance_cfa": new_balance}},
+            )
+            await log_billing_transaction(
+                username=user["username"],
+                tx_type="charge",
+                amount_cfa=-cost,
+                kwh=kwh,
+                session_energy_wh=session_wh,
+            )
     await log_event("stop", user["username"])
-    return {"ok": True, "command": "stop"}
+    return {"ok": True, "command": "stop", "balance_cfa": new_balance}
 
 
 @app.post("/api/command/clear")
@@ -471,7 +514,8 @@ async def get_balance(
 
 
 @app.post("/api/balance/topup")
-async def topup_balance(data: TopupRequest, user: dict = Depends(require_auth)):
+@limiter.limit("10/minute")
+async def topup_balance(request: Request, data: TopupRequest, user: dict = Depends(require_auth)):
     if data.amount_cfa <= 0:
         raise HTTPException(status_code=400, detail="Amount must be positive")
     if data.amount_cfa > 500_000:

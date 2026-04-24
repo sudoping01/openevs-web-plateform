@@ -23,7 +23,7 @@ function AppShell() {
       wsStatus={wsStatus}
     >
       {activePage === "dashboard" && (
-        <Dashboard evse={evse} powerHistory={powerHistory} wsStatus={wsStatus} />
+        <Dashboard evse={evse} powerHistory={powerHistory} wsStatus={wsStatus} onNavigate={setActivePage} />
       )}
       {activePage === "events" && <Events />}
       {activePage === "balance" && <Balance />}

@@ -4,6 +4,38 @@
   min-height: 100vh;
 }
 
+/* ── Low balance banner ──────────────────────────────────────────────────── */
+.low-balance-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(220, 38, 38, 0.07);
+  border-bottom: 1px solid rgba(220, 38, 38, 0.25);
+  padding: 9px 28px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--red);
+  letter-spacing: 0.04em;
+}
+
+.low-balance-link {
+  background: transparent;
+  border: none;
+  color: var(--red);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: opacity var(--transition);
+  margin-left: 4px;
+}
+
+.low-balance-link:hover { opacity: 0.7; }
+
 /* ── Page header ─────────────────────────────────────────────────────────── */
 .dash-header {
   background: rgba(245, 244, 240, 0.92);
@@ -18,6 +50,10 @@
   position: sticky;
   top: 0;
   z-index: 50;
+}
+
+[data-theme="dark"] .dash-header {
+  background: rgba(26, 25, 22, 0.94);
 }
 
 /* Amber top accent */

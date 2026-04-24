@@ -94,10 +94,10 @@ export default function LoginPage() {
 
           <div className="login-tabs">
             <button className={`login-tab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")}>
-              Sign In
+              Login
             </button>
             <button className={`login-tab ${tab === "register" ? "active" : ""}`} onClick={() => switchTab("register")}>
-              Register
+              Sign Up
             </button>
           </div>
 
@@ -173,9 +173,9 @@ export default function LoginPage() {
 
           <p className="login-footer">
             {tab === "login" ? (
-              <>No account?{" "}<button className="link-btn" onClick={() => switchTab("register")}>Register here</button></>
+              <>No account?{" "}<button className="link-btn" onClick={() => switchTab("register")}>Sign up</button></>
             ) : (
-              <>Have an account?{" "}<button className="link-btn" onClick={() => switchTab("login")}>Sign in</button></>
+              <>Have an account?{" "}<button className="link-btn" onClick={() => switchTab("login")}>Login</button></>
             )}
           </p>
         </div>

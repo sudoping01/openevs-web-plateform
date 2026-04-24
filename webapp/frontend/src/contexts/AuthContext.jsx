@@ -60,7 +60,11 @@ export function AuthProvider({ children }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail ?? "Registration failed");
-      saveSession(data.access_token, { username: data.username, email: data.email, car_name: data.car_name });
+      saveSession(data.access_token, {
+        username: data.username, email: data.email, car_name: data.car_name,
+        profile_pic: data.profile_pic ?? null, car_pic: data.car_pic ?? null,
+        balance_cfa: data.balance_cfa ?? 0,
+      });
       return { ok: true };
     } catch (err) {
       return { ok: false, error: err.message };
@@ -79,7 +83,11 @@ export function AuthProvider({ children }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail ?? "Login failed");
-      saveSession(data.access_token, { username: data.username, email: data.email });
+      saveSession(data.access_token, {
+        username: data.username, email: data.email, car_name: data.car_name ?? "",
+        profile_pic: data.profile_pic ?? null, car_pic: data.car_pic ?? null,
+        balance_cfa: data.balance_cfa ?? 0,
+      });
       return { ok: true };
     } catch (err) {
       return { ok: false, error: err.message };

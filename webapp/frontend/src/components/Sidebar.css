@@ -76,6 +76,29 @@
   border-radius: var(--radius);
 }
 
+.theme-toggle {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border-lit);
+  color: var(--text-muted);
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+
+.theme-toggle:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--amber-faint);
+  opacity: 1;
+}
+
 .sidebar-status-dot {
   width: 6px;
   height: 6px;
@@ -208,6 +231,14 @@
   justify-content: center;
   flex-shrink: 0;
   box-shadow: 0 0 10px var(--amber-faint);
+  overflow: hidden;
+}
+
+.sidebar-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .sidebar-user-info { flex: 1; overflow: hidden; }

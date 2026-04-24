@@ -20,6 +20,10 @@
   z-index: 50;
 }
 
+[data-theme="dark"] .events-header {
+  background: rgba(26, 25, 22, 0.94);
+}
+
 .events-header::before {
   content: '';
   position: absolute;

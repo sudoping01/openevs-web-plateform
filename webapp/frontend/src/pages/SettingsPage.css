@@ -6,7 +6,7 @@
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 .settings-header {
-  background: rgba(13, 13, 13, 0.9);
+  background: rgba(245, 244, 240, 0.92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   padding: 0 28px;
@@ -24,6 +24,10 @@
   top: 0; left: 0; right: 0;
   height: 1px;
   background: linear-gradient(90deg, var(--amber) 0%, rgba(245,166,35,0.4) 40%, transparent 70%);
+}
+
+[data-theme="dark"] .settings-header {
+  background: rgba(26, 25, 22, 0.94);
 }
 
 .settings-title {

@@ -38,7 +38,10 @@ export function useWebSocket({ token, onLogout }) {
         onLogout();
         return;
       }
-      reconnectTimer.current = setTimeout(connect, 3000);
+      reconnectTimer.current = setTimeout(() => {
+        setWsStatus("connecting");
+        connect();
+      }, 3000);
     };
 
     ws.onerror = () => ws.close();

@@ -54,6 +54,40 @@
   --transition:     0.18s ease;
 }
 
+/* ── Dark theme ──────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg:          #0f0e0b;
+  --surface:     #1a1916;
+  --surface2:    #222119;
+  --surface3:    #2d2b26;
+  --border:      #2e2d28;
+  --border-lit:  #3d3b35;
+
+  --amber-faint: rgba(224, 145, 16, 0.12);
+  --amber-glow:  rgba(224, 145, 16, 0.26);
+  --cyan-faint:  rgba(8, 145, 178, 0.09);
+
+  --text:           #ece9e2;
+  --text-secondary: #a8a59d;
+  --text-muted:     #6a6860;
+}
+
+[data-theme="dark"] body {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+}
+
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(90deg, #2c2b26 25%, #343329 50%, #2c2b26 75%);
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.6s ease infinite;
+}
+
+[data-theme="dark"] .toast-success { background: rgba(10, 30, 18, 0.97); }
+[data-theme="dark"] .toast-error   { background: rgba(30, 10, 10, 0.97); }
+[data-theme="dark"] .toast-info    { background: rgba(8,  20, 35, 0.97); }
+
 html { scroll-behavior: smooth; }
 
 body {

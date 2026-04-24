@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import "./Sidebar.css";
 
 const NAV_ITEMS = [
@@ -45,8 +46,44 @@ const NAV_ITEMS = [
   },
 ];
 
+function SunIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+    </svg>
+  );
+}
+
 export default function Sidebar({ activePage, setActivePage, user, onLogout, wsStatus }) {
   const initials = user?.username?.slice(0, 2).toUpperCase() ?? "??";
+
+  const [dark, setDark] = useState(() => {
+    return localStorage.getItem("theme") === "dark";
+  });
+
+  useEffect(() => {
+    const theme = dark ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [dark]);
+
+  // Apply saved theme on first render
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved) document.documentElement.setAttribute("data-theme", saved);
+  }, []);
 
   return (
     <aside className="sidebar">
@@ -69,6 +106,13 @@ export default function Sidebar({ activePage, setActivePage, user, onLogout, wsS
         <span className="sidebar-status-label">
           {wsStatus === "connected" ? "Live" : wsStatus === "connecting" ? "Connecting…" : "Disconnected"}
         </span>
+        <button
+          className="theme-toggle"
+          onClick={() => setDark((d) => !d)}
+          title={dark ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {dark ? <SunIcon /> : <MoonIcon />}
+        </button>
       </div>
 
       {/* Nav */}
@@ -87,10 +131,14 @@ export default function Sidebar({ activePage, setActivePage, user, onLogout, wsS
 
       {/* User section */}
       <div className="sidebar-user">
-        <div className="sidebar-user-avatar">{initials}</div>
+        <div className="sidebar-user-avatar">
+          {user?.profile_pic ? (
+            <img src={user.profile_pic} alt={initials} className="sidebar-avatar-img" />
+          ) : initials}
+        </div>
         <div className="sidebar-user-info">
           <div className="sidebar-user-name">{user?.username}</div>
-          <div className="sidebar-user-role">{user?.role ?? "user"}</div>
+          <div className="sidebar-user-role">{user?.car_name || user?.role || "user"}</div>
         </div>
         <button className="sidebar-logout-btn" onClick={onLogout} title="Sign out">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

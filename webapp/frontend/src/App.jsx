@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage.jsx";
 import Layout from "./components/Layout.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Events from "./pages/Events.jsx";
+import Balance from "./pages/Balance.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import { useWebSocket } from "./hooks/useWebSocket.js";
 
@@ -22,9 +23,10 @@ function AppShell() {
       wsStatus={wsStatus}
     >
       {activePage === "dashboard" && (
-        <Dashboard evse={evse} powerHistory={powerHistory} wsStatus={wsStatus} />
+        <Dashboard evse={evse} powerHistory={powerHistory} wsStatus={wsStatus} onNavigate={setActivePage} />
       )}
       {activePage === "events" && <Events />}
+      {activePage === "balance" && <Balance />}
       {activePage === "settings" && <SettingsPage />}
     </Layout>
   );

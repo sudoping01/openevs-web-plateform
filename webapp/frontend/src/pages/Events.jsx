@@ -42,10 +42,6 @@ function EventRow({ event, idx }) {
       <div className="event-row-badge">
         <CommandBadge command={event.command} />
       </div>
-      <div className="event-row-user">
-        <span className="event-user-avatar">{event.username?.slice(0, 1).toUpperCase()}</span>
-        <span className="event-username">{event.username}</span>
-      </div>
       <div className="event-row-detail">
         {formatMeta(event.meta) && (
           <span className="event-meta">{formatMeta(event.meta)}</span>
@@ -134,7 +130,6 @@ export default function Events() {
                 <div className="skeleton" style={{ height: 14, width: 80 }} />
                 <div className="skeleton" style={{ height: 24, width: 110, borderRadius: 20 }} />
                 <div className="skeleton" style={{ height: 14, width: 90 }} />
-                <div className="skeleton" style={{ height: 14, width: 60 }} />
               </div>
             ))}
           </div>
@@ -145,7 +140,6 @@ export default function Events() {
             <div className="events-table-header">
               <span>Time</span>
               <span>Command</span>
-              <span>User</span>
               <span>Details</span>
             </div>
             {events.map((ev, i) => (

@@ -3,41 +3,41 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Core palette */
-  --bg:          #060606;
-  --surface:     #0d0d0d;
-  --surface2:    #131313;
-  --surface3:    #191919;
-  --border:      #1e1e1e;
-  --border-lit:  #303030;
+  /* Core palette — light theme */
+  --bg:          #f5f4f0;
+  --surface:     #ffffff;
+  --surface2:    #f0efe9;
+  --surface3:    #e8e7e1;
+  --border:      #e0dfd8;
+  --border-lit:  #c8c7c0;
 
   /* Amber accent — the energy color */
-  --amber:       #f5a623;
+  --amber:       #e09110;
   --amber-dim:   #a86e10;
-  --amber-glow:  rgba(245, 166, 35, 0.22);
-  --amber-faint: rgba(245, 166, 35, 0.07);
+  --amber-glow:  rgba(224, 145, 16, 0.22);
+  --amber-faint: rgba(224, 145, 16, 0.08);
 
   /* Cyan — secondary accent */
-  --cyan:        #22d3ee;
-  --cyan-dim:    #0891b2;
-  --cyan-glow:   rgba(34, 211, 238, 0.18);
-  --cyan-faint:  rgba(34, 211, 238, 0.06);
+  --cyan:        #0891b2;
+  --cyan-dim:    #0e7490;
+  --cyan-glow:   rgba(8, 145, 178, 0.18);
+  --cyan-faint:  rgba(8, 145, 178, 0.07);
 
   /* Status colors */
-  --green:       #22c55e;
-  --green-glow:  rgba(34, 197, 94, 0.18);
-  --red:         #ef4444;
-  --red-glow:    rgba(239, 68, 68, 0.16);
-  --blue:        #38bdf8;
-  --blue-glow:   rgba(56, 189, 248, 0.16);
-  --purple:      #a78bfa;
-  --yellow:      #fbbf24;
-  --orange:      #fb923c;
+  --green:       #16a34a;
+  --green-glow:  rgba(22, 163, 74, 0.18);
+  --red:         #dc2626;
+  --red-glow:    rgba(220, 38, 38, 0.16);
+  --blue:        #0284c7;
+  --blue-glow:   rgba(2, 132, 199, 0.16);
+  --purple:      #7c3aed;
+  --yellow:      #d97706;
+  --orange:      #ea580c;
 
   /* Typography */
-  --text:        #ebebeb;
-  --text-secondary: #9a9a9a;
-  --text-muted:  #4a4a4a;
+  --text:        #1a1916;
+  --text-secondary: #5a5955;
+  --text-muted:  #9a9994;
 
   /* Fonts */
   --font-display: 'Bebas Neue', 'Impact', sans-serif;
@@ -54,6 +54,40 @@
   --transition:     0.18s ease;
 }
 
+/* ── Dark theme ──────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg:          #0f0e0b;
+  --surface:     #1a1916;
+  --surface2:    #222119;
+  --surface3:    #2d2b26;
+  --border:      #2e2d28;
+  --border-lit:  #3d3b35;
+
+  --amber-faint: rgba(224, 145, 16, 0.12);
+  --amber-glow:  rgba(224, 145, 16, 0.26);
+  --cyan-faint:  rgba(8, 145, 178, 0.09);
+
+  --text:           #ece9e2;
+  --text-secondary: #a8a59d;
+  --text-muted:     #6a6860;
+}
+
+[data-theme="dark"] body {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+}
+
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(90deg, #2c2b26 25%, #343329 50%, #2c2b26 75%);
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.6s ease infinite;
+}
+
+[data-theme="dark"] .toast-success { background: rgba(10, 30, 18, 0.97); }
+[data-theme="dark"] .toast-error   { background: rgba(30, 10, 10, 0.97); }
+[data-theme="dark"] .toast-info    { background: rgba(8,  20, 35, 0.97); }
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -67,8 +101,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   /* Fine engineering grid */
   background-image:
-    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
   background-size: 36px 36px;
 }
 
@@ -142,7 +176,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #131313 25%, #1e1e1e 50%, #131313 75%);
+  background: linear-gradient(90deg, #e8e7e1 25%, #f0efe9 50%, #e8e7e1 75%);
   background-size: 200% 100%;
   animation: skeleton-sweep 1.6s ease infinite;
   border-radius: 2px;
@@ -186,24 +220,24 @@ input[type="range"]::-moz-range-thumb {
 .toast-icon { font-size: 12px; font-weight: 800; flex-shrink: 0; }
 
 .toast-success {
-  background: rgba(10, 18, 8, 0.92);
+  background: rgba(240, 250, 244, 0.96);
   border-color: var(--green);
   color: var(--green);
-  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.12);
+  box-shadow: 0 4px 20px rgba(22, 163, 74, 0.12);
 }
 
 .toast-error {
-  background: rgba(18, 8, 8, 0.92);
+  background: rgba(254, 242, 242, 0.96);
   border-color: var(--red);
   color: var(--red);
-  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.12);
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.12);
 }
 
 .toast-info {
-  background: rgba(8, 15, 20, 0.92);
+  background: rgba(240, 249, 255, 0.96);
   border-color: var(--blue);
   color: var(--blue);
-  box-shadow: 0 4px 20px rgba(56, 189, 248, 0.12);
+  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.12);
 }
 
 @media (max-width: 640px) {

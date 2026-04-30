@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { ToastContainer, useToast } from "../hooks/useToast.jsx";
 import { EVSE_STATES, fmtEnergy, fmtElapsed } from "../utils/evse.js";
@@ -172,22 +172,46 @@ function Section({ title, children, charging }) {
 }
 
 // ── Dashboard page ────────────────────────────────────────────────────────────
-export default function Dashboard({ evse, powerHistory, wsStatus }) {
-  const { authFetch } = useAuth();
+const LOW_BALANCE_THRESHOLD = 500; // CFA
+
+export default function Dashboard({ evse, powerHistory, wsStatus, onNavigate }) {
+  const { authFetch, user, updateUser } = useAuth();
   const { toasts, addToast } = useToast();
+  const [balance, setBalance] = useState(user?.balance_cfa ?? 0);
+  const [rate, setRate] = useState(100);
 
   const loading = wsStatus === "connecting" && Object.keys(evse).length === 0;
+
+  // Fetch balance + rate on mount
+  useEffect(() => {
+    authFetch("/api/balance?limit=1")
+      .then((r) => r.json())
+      .then((d) => {
+        setBalance(d.balance_cfa ?? 0);
+        setRate(d.rate_cfa_per_kwh ?? 100);
+        updateUser({ balance_cfa: d.balance_cfa });
+      })
+      .catch(() => {});
+  }, [authFetch, updateUser]);
 
   const send = useCallback(async (path, successMsg) => {
     try {
       const res = await authFetch(`/api/command/${path}`, { method: "POST" });
       const data = await res.json();
-      if (data.ok) addToast(successMsg || "Command sent", "success");
-      else addToast(data.error || "Command failed", "error");
+      if (data.ok) {
+        addToast(successMsg || "Command sent", "success");
+        // Refresh balance after stop
+        if (path === "stop" && data.balance_cfa !== undefined) {
+          setBalance(data.balance_cfa);
+          updateUser({ balance_cfa: data.balance_cfa });
+        }
+      } else {
+        addToast(data.error || "Command failed", "error");
+      }
     } catch (err) {
       addToast(err.message || "Request failed", "error");
     }
-  }, [authFetch, addToast]);
+  }, [authFetch, addToast, updateUser]);
 
   const deviceName  = evse["config"]?.hostname ?? "openevse";
   const evseConn    = evse["evse_connected"] === "1" || evse["evse_connected"] === 1;
@@ -212,9 +236,21 @@ export default function Dashboard({ evse, powerHistory, wsStatus }) {
   const maxCurrent = parseInt(evse["max_current"]) || 32;
   const amberColor = "var(--amber)";
 
+  const estCostCFA = Math.round((parseFloat(sessionEnergy) / 1000) * rate);
+  const isLowBalance = balance < LOW_BALANCE_THRESHOLD;
+
   return (
     <div className="dashboard">
       <ToastContainer toasts={toasts} />
+
+      {/* Low balance warning */}
+      {isLowBalance && balance >= 0 && (
+        <div className="low-balance-banner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Low balance — {balance.toLocaleString()} CFA remaining.
+          <button className="low-balance-link" onClick={() => onNavigate?.("balance")}>Top up now →</button>
+        </div>
+      )}
 
       {/* Header */}
       <header className="dash-header">
@@ -225,6 +261,10 @@ export default function Dashboard({ evse, powerHistory, wsStatus }) {
           </span>
         </div>
         <div className="dash-header-pills">
+          {user?.car_name && (
+            <ConnPill label={user.car_name} active={true} color="var(--purple)" />
+          )}
+          <ConnPill label={`${balance.toLocaleString()} CFA`} active={!isLowBalance} color={isLowBalance ? "var(--red)" : "var(--green)"} />
           <ConnPill label="LIVE"    active={wsStatus === "connected"} color="var(--green)" />
           <ConnPill label="CHARGER" active={evseConn}                 color="var(--cyan)"  />
         </div>
@@ -261,6 +301,10 @@ export default function Dashboard({ evse, powerHistory, wsStatus }) {
             <MetricCard label="Session Duration" value={fmtElapsed(sessionElapsed)} loading={loading} />
             <MetricCard label="Total Energy"     value={fmtEnergy(totalEnergy)} loading={loading} />
             <MetricCard label="Today"            value={fmtEnergy(evse["total_day"] ?? "0")} loading={loading} />
+            <MetricCard label="Est. Session Cost" value={estCostCFA.toLocaleString()} unit=" CFA"
+              color={isCharging ? "var(--orange)" : undefined} loading={loading} />
+            <MetricCard label="Balance" value={balance.toLocaleString()} unit=" CFA"
+              color={isLowBalance ? "var(--red)" : "var(--green)"} loading={loading} />
           </div>
         </Section>
 

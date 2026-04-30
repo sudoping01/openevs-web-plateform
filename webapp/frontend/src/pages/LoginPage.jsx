@@ -7,7 +7,7 @@ export default function LoginPage() {
   const [tab, setTab] = useState("login");
 
   const [loginData, setLoginData]   = useState({ username: "", password: "" });
-  const [regData, setRegData]       = useState({ username: "", email: "", password: "", confirm: "" });
+  const [regData, setRegData]       = useState({ username: "", email: "", password: "", confirm: "", car_name: "" });
   const [error, setError]           = useState("");
 
   const handleLogin = async (e) => {
@@ -21,7 +21,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     if (regData.password !== regData.confirm) { setError("Passwords do not match"); return; }
-    const result = await register(regData.username, regData.email, regData.password);
+    const result = await register(regData.username, regData.email, regData.password, regData.car_name);
     if (!result.ok) setError(result.error);
   };
 
@@ -55,7 +55,7 @@ export default function LoginPage() {
         <div className="login-brand-content">
           <div className="login-brand-eyebrow">EV Charge Management Platform</div>
 
-          <h1 className="login-brand-title">OpenEVSE</h1>
+          <h1 className="login-brand-title">DAUST EV Charger</h1>
           <div className="login-brand-tagline">Smart Charging Infrastructure</div>
 
           <p className="login-brand-subtitle">
@@ -89,15 +89,15 @@ export default function LoginPage() {
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
             </div>
-            <span className="login-form-logo-text">OpenEVSE</span>
+            <span className="login-form-logo-text">DAUST EV Charger</span>
           </div>
 
           <div className="login-tabs">
             <button className={`login-tab ${tab === "login" ? "active" : ""}`} onClick={() => switchTab("login")}>
-              Sign In
+              Login
             </button>
             <button className={`login-tab ${tab === "register" ? "active" : ""}`} onClick={() => switchTab("register")}>
-              Register
+              Sign Up
             </button>
           </div>
 
@@ -129,7 +129,7 @@ export default function LoginPage() {
               </div>
               {error && <div className="form-error">{error}</div>}
               <button className="form-submit" type="submit" disabled={loading}>
-                {loading ? <span className="btn-spinner" /> : "Authenticate"}
+                {loading ? <span className="btn-spinner" /> : "Login"}
               </button>
             </form>
           ) : (
@@ -158,6 +158,12 @@ export default function LoginPage() {
                   autoComplete="new-password" value={regData.confirm}
                   onChange={(e) => setRegData({ ...regData, confirm: e.target.value })} required />
               </div>
+              <div className="form-group">
+                <label className="form-label">Car Name</label>
+                <input className="form-input" type="text" placeholder="e.g. Tesla Model 3"
+                  autoComplete="off" value={regData.car_name}
+                  onChange={(e) => setRegData({ ...regData, car_name: e.target.value })} />
+              </div>
               {error && <div className="form-error">{error}</div>}
               <button className="form-submit" type="submit" disabled={loading}>
                 {loading ? <span className="btn-spinner" /> : "Create Account"}
@@ -167,9 +173,9 @@ export default function LoginPage() {
 
           <p className="login-footer">
             {tab === "login" ? (
-              <>No account?{" "}<button className="link-btn" onClick={() => switchTab("register")}>Register here</button></>
+              <>No account?{" "}<button className="link-btn" onClick={() => switchTab("register")}>Sign up</button></>
             ) : (
-              <>Have an account?{" "}<button className="link-btn" onClick={() => switchTab("login")}>Sign in</button></>
+              <>Have an account?{" "}<button className="link-btn" onClick={() => switchTab("login")}>Login</button></>
             )}
           </p>
         </div>

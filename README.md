@@ -45,8 +45,8 @@ OpenEVSE device (ESP32)
 ## Quick start
 
 ```bash
-git clone <repo-url>
-cd <repo-dir>
+git clone [<repo-url>](https://github.com/sudoping01/openevs-web-plateform)
+cd[ <repo-dir>](https://github.com/sudoping01/openevs-web-plateform)
 docker compose up -d
 ```
 

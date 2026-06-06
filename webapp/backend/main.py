@@ -24,7 +24,7 @@ MQTT_HOST = os.getenv("MQTT_HOST", "localhost")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
 MQTT_USER = os.getenv("MQTT_USER", "test")
 MQTT_PASS = os.getenv("MQTT_PASS", "test")
-MQTT_BASE_TOPIC = os.getenv("MQTT_BASE_TOPIC", "DAUSTCharger/openevse")
+MQTT_BASE_TOPIC = os.getenv("MQTT_BASE_TOPIC", "openevse/openevse")
 
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
 MONGO_DB = os.getenv("MONGO_DB", "openevse")

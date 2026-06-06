@@ -40,7 +40,7 @@ services:
       - MQTT_PORT=1883
       - MQTT_USER=sed
       - MQTT_PASS=sed
-      - MQTT_BASE_TOPIC=${MQTT_BASE_TOPIC:-DAUSTCharger/openevse}
+      - MQTT_BASE_TOPIC=${MQTT_BASE_TOPIC:-openevse/openevse}
       - MONGO_URL=mongodb://mongodb:27017
       - MONGO_DB=openevse
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production-use-a-long-random-secret}

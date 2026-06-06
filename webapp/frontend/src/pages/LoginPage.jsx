@@ -55,7 +55,7 @@ export default function LoginPage() {
         <div className="login-brand-content">
           <div className="login-brand-eyebrow">EV Charge Management Platform</div>
 
-          <h1 className="login-brand-title">DAUST EV Charger</h1>
+          <h1 className="login-brand-title">OpenEVSE</h1>
           <div className="login-brand-tagline">Smart Charging Infrastructure</div>
 
           <p className="login-brand-subtitle">
@@ -89,7 +89,7 @@ export default function LoginPage() {
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
             </div>
-            <span className="login-form-logo-text">DAUST EV Charger</span>
+            <span className="login-form-logo-text">OpenEVSE</span>
           </div>
 
           <div className="login-tabs">

@@ -92,13 +92,13 @@ Once the device connects and starts publishing, the dashboard will update in rea
 
 ## Features
 
-**Dashboard** — live state badge, current / voltage / power / pilot readings, session energy and duration, lifetime energy counter, and a rolling power chart of the last ~60 minutes.
+**Dashboard**  live state badge, current / voltage / power / pilot readings, session energy and duration, lifetime energy counter, and a rolling power chart of the last ~60 minutes.
 
-**Controls** — start and stop charging, clear a manual override, set charge current (6–32 A via RAPI `$SC`), switch between Eco (solar divert) and Fast modes, and restart the gateway or EVSE module.
+**Controls**  start and stop charging, clear a manual override, set charge current (6–32 A via RAPI `$SC`), switch between Eco (solar divert) and Fast modes, and restart the gateway or EVSE module.
 
-**Events** — paginated log of commands sent through the platform, stored in MongoDB and scoped to the authenticated user.
+**Events**  paginated log of commands sent through the platform, stored in MongoDB and scoped to the authenticated user.
 
-**Balance** — per-user credit balance. Energy cost is deducted automatically when a charging session is stopped. Users can top up their balance through the platform. The rate is set with `RATE_CFA_PER_KWH`.
+**Balance** per-user credit balance. Energy cost is deducted automatically when a charging session is stopped. Users can top up their balance through the platform. The rate is set with `RATE_CFA_PER_KWH`.
 
 ## API
 
